@@ -627,9 +627,8 @@ void compress_float_to_uint8_host(T *input, int input_num_element, int chunk_siz
 template<typename T>
 void compress_float_to_uint8_host_vector(
         T *input, int input_num_element, int max_chunk_size, int num_chunks, long* chunks_offset,
-        uint8_t *output, long* outputs_offset, T* min_max,
-        void *dev_buffer, size_t dev_size, cudaStream_t stream) {
-    array_min_max(input, input_num_element, dev_buffer, dev_size, min_max, stream);
+        uint8_t *output, long* outputs_offset, T* min_max, cudaStream_t stream) {
+    //array_min_max(input, input_num_element, dev_buffer, dev_size, min_max, stream);
 
     dim3 num_blocks(DIVUP(max_chunk_size, 1024), num_chunks);
     compress_float_to_uint8_vector<<<num_blocks, 1024, 0, stream>>>(
@@ -763,13 +762,11 @@ size_t array_min_max_size_f16_host(half *input, int input_num_element, half *out
 
 void compress_f16_to_uint8_host_vector(
         half *input, int input_num_element, int max_chunk_size, int num_chunks, long* chunks_offset,
-        uint8_t *output, long* outputs_offset, half* min_max,
-        void *dev_buffer, size_t dev_size, cudaStream_t stream) {
+        uint8_t *output, long* outputs_offset, half* min_max, cudaStream_t stream) {
     if (max_chunk_size == 0) return;
     compress_float_to_uint8_host_vector(
         input, input_num_element, max_chunk_size, num_chunks, chunks_offset,
-        output, outputs_offset, min_max,
-        dev_buffer, dev_size, stream);
+        output, outputs_offset, min_max, stream);
 }
 
 void decompress_uint8_to_f16_host_vector(

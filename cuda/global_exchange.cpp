@@ -21,8 +21,8 @@ extern "C" void compress_f16_to_uint8_host_vector(
     uint8_t *output,
     long* outputs_offset,
     at::Half* min_max,
-    void *dev_buffer,
-    size_t dev_size,
+    //void *dev_buffer,
+    //size_t dev_size,
     cudaStream_t stream);
 
 extern "C" void decompress_uint8_to_f16_host_vector(
@@ -95,12 +95,14 @@ torch::Tensor _global_scatter(
 
     // temp_buff min_max
     auto min_max = input_buf.new_empty({2}, at::ScalarType::Half);
-    size_t temp_buff_size = array_min_max_size_f16_host(
-        input_buf.data_ptr<at::Half>(),
-        input_buf.numel(),
-        reinterpret_cast<at::Half*>(local_compressed.data_ptr<uint8_t>()),
-        smgr->stream(0));
-    auto temp_buff = input_buf.new_empty({temp_buff_size}, at::ScalarType::Byte);
+    min_max[0] = input_buf.min();
+    min_max[1] = input_buf.max();
+    //size_t temp_buff_size = array_min_max_size_f16_host(
+    //    input_buf.data_ptr<at::Half>(),
+    //    input_buf.numel(),
+    //    reinterpret_cast<at::Half*>(local_compressed.data_ptr<uint8_t>()),
+    //    smgr->stream(0));
+    //auto temp_buff = input_buf.new_empty({temp_buff_size}, at::ScalarType::Byte);
 
     // compress
     compress_f16_to_uint8_host_vector(
@@ -112,8 +114,8 @@ torch::Tensor _global_scatter(
         local_compressed.data_ptr<uint8_t>(),
         local_compressed_offset.cuda().data_ptr<long>(),
         min_max.data_ptr<at::Half>(),
-        temp_buff.data_ptr<uint8_t>(),
-        temp_buff_size,
+        //temp_buff.data_ptr<uint8_t>(),
+        //temp_buff_size,
         smgr->stream(0));
 
     // global
@@ -220,12 +222,14 @@ torch::Tensor _global_gather(
 
     // temp_buff min_max
     auto min_max = output_buf.new_empty({2}, at::ScalarType::Half);
-    size_t temp_buff_size = array_min_max_size_f16_host(
-        output_buf.data_ptr<at::Half>(),
-        output_buf.numel(),
-        reinterpret_cast<at::Half*>(global_compressed.data_ptr<uint8_t>()),
-        smgr->stream(0));
-    auto temp_buff = output_buf.new_empty({temp_buff_size}, at::ScalarType::Byte);
+    min_max[0] = output_buf.min();
+    min_max[1] = output_buf.max();
+    //size_t temp_buff_size = array_min_max_size_f16_host(
+    //    output_buf.data_ptr<at::Half>(),
+    //    output_buf.numel(),
+    //    reinterpret_cast<at::Half*>(global_compressed.data_ptr<uint8_t>()),
+    //    smgr->stream(0));
+    //auto temp_buff = output_buf.new_empty({temp_buff_size}, at::ScalarType::Byte);
 
     // compress
     compress_f16_to_uint8_host_vector(
@@ -237,8 +241,8 @@ torch::Tensor _global_gather(
         global_compressed.data_ptr<uint8_t>(),
         global_compressed_offset.cuda().data_ptr<long>(),
         min_max.data_ptr<at::Half>(),
-        temp_buff.data_ptr<uint8_t>(),
-        temp_buff_size,
+        //temp_buff.data_ptr<uint8_t>(),
+        //temp_buff_size,
         smgr->stream(0));
 
     // local
