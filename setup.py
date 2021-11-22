@@ -17,6 +17,7 @@ authors = [
 
 if os.environ.get('USE_NCCL', '0') == '1':
     cxx_flags.append('-DFMOE_USE_NCCL')
+    cxx_flags.append('-DTHRUST_IGNORE_CUB_VERSION_CHECK')
     ext_libs.append('nccl')
 
 
