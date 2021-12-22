@@ -35,6 +35,7 @@ if __name__ == '__main__':
                 name='fmoe_cuda', 
                 sources=[
                     'cuda/stream_manager.cpp',
+                    'cuda/bagua_kernels.cu',
                     'cuda/local_exchange.cu',
                     'cuda/balancing.cu',
                     'cuda/global_exchange.cpp',
